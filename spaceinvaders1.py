@@ -30,6 +30,7 @@ class Craft(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.startx = self.rect.x
         self.move_speed = 1
+        self.outOf = False
 
     def update(self):
         """Call each frame to move across screen"""
@@ -37,6 +38,22 @@ class Craft(pygame.sprite.Sprite):
         if self.rect.x > SCREEN_WIDTH - self.width or self.rect.x < 1:
             self.move_speed = -(self.move_speed)
             #print(self.rect.x, " ", SCREEN_WIDTH, " ", self.width)
+
+class UFO(Craft):
+    def __init__(self, colour, width, height):
+        Craft.__init__(self, colour, width, height)
+
+        self.move_speed = 2
+    def update(self):
+        self.rect.x += self.move_speed
+        if self.rect.x > SCREEN_WIDTH - self.width or self.rect.x < 1:
+            self.outOf = True
+            
+        
+
+    def changeDirection(self, left = True):
+        if left:
+            self.move_speed = -(self.move_speed) 
 
 class Laser(pygame.sprite.Sprite):
     """Lasers to shoot"""
@@ -78,10 +95,10 @@ class PlayerCraft(pygame.sprite.Sprite):
     def move(self, right = True):
         if right:
             if self.rect.x < SCREEN_WIDTH - self.width:
-                self.rect.x += 1
+                self.rect.x += 2
         else:
             if self.rect.x > 0:
-                self.rect.x -= 1
+                self.rect.x -= 2
             
 
 
@@ -116,13 +133,14 @@ def main():
     
     laser_list = pygame.sprite.Group()
     bad_laser_list = pygame.sprite.Group()
+    ufo_sprites_list = pygame.sprite.Group()
     
 
     player = PlayerCraft(RED, 20, 15)
     player.rect.x = 20
     player.rect.y = SCREEN_HEIGHT - 50
     all_sprites_list.add(player)
-
+    
     clock=pygame.time.Clock()
     score = 0
     
@@ -191,12 +209,30 @@ def main():
         if atedge:
             for cft in craft_list:
                 cft.move_speed = -(cft.move_speed)
-                cft.rect.y = cft.rect.y + 1
-            
+                cft.rect.y = cft.rect.y + 3
+                
+        if random.randint(0,750) == 0 and len(ufo_sprites_list.sprites()) < 1:              
+            aUfo = UFO(WHITE, 30, 10)
+            aUfo.rect.y = 10
+            if random.randint(0,2) == 0:
+                aUfo.rect.x = 30
+            else:
+                aUfo.rect.x = SCREEN_WIDTH - 30
+                aUfo.changeDirection(True)
 
+            all_sprites_list.add(aUfo)
+            ufo_sprites_list.add(aUfo)
+            
+        if len(ufo_sprites_list.sprites()) > 0:
+          for u in ufo_sprites_list:
+            u.update()
+            if u.outOf:
+                all_sprites_list.remove(aUfo)
+                ufo_sprites_list.remove(aUfo)
+            
         all_sprites_list.draw(screen)
 
-        clock.tick(60)
+        clock.tick(30)
 
         pygame.display.flip()
         
