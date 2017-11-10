@@ -1,5 +1,5 @@
 """
-Space invaders game for students to update
+Space invaders game for students to update 10/11/2017
 """
 
 import pygame
